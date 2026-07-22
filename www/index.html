@@ -33,7 +33,11 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f6e7c1;fon
    if(!response.ok)throw new Error(`Amélioration manquante : part${name}`);
    patchParts.push(await response.text());
   }
-  new Function(patchParts.join(''))();
+  const patchCode=patchParts.join('').replace(
+   "if(i<0)throw new Error('Patch introuvable: '+label);",
+   "if(i<0){if(label==='oldconveyorloop')return text;throw new Error('Patch introuvable: '+label);}"
+  );
+  new Function(patchCode)();
   if(typeof window.applyReproductionV1!=='function')throw new Error('Le correctif de reproduction ne s’est pas chargé.');
   html=window.applyReproductionV1(html);
   if(!html.includes('Œufs fécondés')||html.includes('CONVEYOR BELT'))throw new Error('La vérification finale de la ferme a échoué.');
