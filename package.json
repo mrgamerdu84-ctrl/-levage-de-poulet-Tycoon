@@ -1,0 +1,16 @@
+{
+  "name": "ferme-avicole-3d",
+  "version": "1.0.0",
+  "description": "Ferme avicole 3D - décor interactif packagé en application Android via Capacitor",
+  "scripts": {
+    "sync": "npx cap sync android",
+    "open:android": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}
