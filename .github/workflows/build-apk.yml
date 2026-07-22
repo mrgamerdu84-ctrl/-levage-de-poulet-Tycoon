@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: build-apk-main
+  cancel-in-progress: true
+
 jobs:
   build-apk:
     name: Compiler l'APK Android
@@ -52,7 +56,7 @@ jobs:
           test -s release/elevage-de-poulet-tycoon.apk
           ls -lh release/elevage-de-poulet-tycoon.apk
 
-      - name: Publier l'APK dans la Release de test
+      - name: Publier une Release APK visible
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -60,13 +64,25 @@ jobs:
           gh release delete "$TAG" --cleanup-tag --yes 2>/dev/null || true
           gh release create "$TAG" release/elevage-de-poulet-tycoon.apk \
             --target "$GITHUB_SHA" \
-            --title "APK de test - dernière version" \
-            --notes "APK Android de test compilé automatiquement depuis la branche main. Build GitHub Actions n°${GITHUB_RUN_NUMBER}." \
-            --prerelease
+            --title "Élevage de Poulet Tycoon - APK Android" \
+            --notes "Dernière version Android compilée automatiquement depuis la branche main. Build GitHub Actions n°${GITHUB_RUN_NUMBER}." \
+            --latest
+
+      - name: Vérifier la Release et son APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="apk-latest"
+          RELEASE_URL=$(gh release view "$TAG" --json url --jq '.url')
+          ASSET_NAME=$(gh release view "$TAG" --json assets --jq '.assets[0].name')
+          test "$ASSET_NAME" = "elevage-de-poulet-tycoon.apk"
+          echo "RELEASE_URL=$RELEASE_URL" >> "$GITHUB_ENV"
+          echo "Release vérifiée : $RELEASE_URL"
+          echo "APK vérifié : $ASSET_NAME"
 
       - name: Résumé de la compilation
         run: |
           echo "## Élevage de Poulet Tycoon" >> "$GITHUB_STEP_SUMMARY"
-          echo "✅ L'APK a été compilé avec succès." >> "$GITHUB_STEP_SUMMARY"
-          echo "📦 Téléchargement : **Releases → APK de test - dernière version**." >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ L'APK a été compilé et vérifié." >> "$GITHUB_STEP_SUMMARY"
+          echo "📦 [Télécharger la Release APK]($RELEASE_URL)" >> "$GITHUB_STEP_SUMMARY"
           echo "Fichier : \`elevage-de-poulet-tycoon.apk\`" >> "$GITHUB_STEP_SUMMARY"
