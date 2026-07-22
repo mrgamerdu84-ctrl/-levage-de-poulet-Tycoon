@@ -3,38 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Ferme avicole — restauration originale</title>
+<title>Ferme avicole — amélioration reproduction</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f6e7c1;font-family:Arial,sans-serif;color:#6b4423}body{display:grid;place-items:center}.card{width:min(86vw,420px);padding:24px;border-radius:22px;background:rgba(255,250,235,.96);box-shadow:0 18px 55px rgba(71,42,18,.28);text-align:center;border:1px solid rgba(107,68,35,.18)}.icon{font-size:58px}.title{font-size:22px;font-weight:800;margin:8px 0}.status{font-size:13px;line-height:1.5;color:#76583e}.bar{height:10px;border-radius:999px;background:#dfcfad;overflow:hidden;margin-top:18px}.fill{height:100%;width:25%;border-radius:inherit;background:linear-gradient(90deg,#79a94c,#e0ad43);animation:load 1.2s ease-in-out infinite alternate}@keyframes load{to{width:92%}}#error{display:none;color:#a12c24;margin-top:14px;font-size:12px;white-space:pre-wrap}
 </style>
 </head>
 <body>
-<div class="card"><div class="icon">🐔</div><div class="title">Ouverture de ta ferme originale</div><div class="status" id="status">Vérification de la version fournie au début…</div><div class="bar"><div class="fill"></div></div><div id="error"></div></div>
+<div class="card"><div class="icon">🐔</div><div class="title">Amélioration de ta ferme</div><div class="status" id="status">Chargement de ta version originale…</div><div class="bar"><div class="fill"></div></div><div id="error"></div></div>
 <script>
 'use strict';
 (async()=>{
  const status=document.getElementById('status'),error=document.getElementById('error');
  try{
-  const names=['00','01','02','03','04','05','06','07'],parts=[];
-  for(const name of names){
-   status.textContent=`Chargement de la ferme originale… ${Number(name)+1}/8`;
+  const originalNames=['00','01','02','03','04','05','06','07'],originalParts=[];
+  for(const name of originalNames){
+   status.textContent=`Chargement de la base originale… ${Number(name)+1}/8`;
    const response=await fetch(`original/part${name}.b64`,{cache:'force-cache'});
-   if(!response.ok)throw new Error(`Fichier local manquant : part${name} (${response.status})`);
-   parts.push((await response.text()).trim());
+   if(!response.ok)throw new Error(`Base originale manquante : part${name}`);
+   originalParts.push((await response.text()).trim());
   }
-  const binary=atob(parts.join('')),bytes=new Uint8Array(binary.length);
+  const binary=atob(originalParts.join('')),bytes=new Uint8Array(binary.length);
   for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-  if(bytes.length!==45900)throw new Error(`Taille incorrecte : ${bytes.length} octets au lieu de 45900`);
-  if(globalThis.crypto?.subtle){
-   status.textContent='Contrôle de la copie originale…';
-   const digest=await crypto.subtle.digest('SHA-256',bytes);
-   const hash=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
-   if(hash!=='683b1c8c654d1a63ca788b4e231e8022c4750af8939fd1f9ca71092d67998be7')throw new Error('La copie locale ne correspond pas au ZIP original.');
+  if(bytes.length!==45900)throw new Error(`Taille originale incorrecte : ${bytes.length}`);
+  let html=new TextDecoder('utf-8').decode(bytes);
+  const patchNames=['00','01','02','03','04'],patchParts=[];
+  for(const name of patchNames){
+   status.textContent=`Application des améliorations… ${Number(name)+1}/5`;
+   const response=await fetch(`patches/reproduction-v1/part${name}.txt`,{cache:'no-store'});
+   if(!response.ok)throw new Error(`Amélioration manquante : part${name}`);
+   patchParts.push(await response.text());
   }
-  const html=new TextDecoder('utf-8').decode(bytes);
-  if(!html.includes('<title>Ferme avicole — décor 3D</title>'))throw new Error('Le contenu ne correspond pas à ta ferme originale.');
+  new Function(patchParts.join(''))();
+  if(typeof window.applyReproductionV1!=='function')throw new Error('Le correctif de reproduction ne s’est pas chargé.');
+  html=window.applyReproductionV1(html);
+  if(!html.includes('Œufs fécondés')||html.includes('CONVEYOR BELT'))throw new Error('La vérification finale de la ferme a échoué.');
   document.open();document.write(html);document.close();
- }catch(err){status.textContent='La copie originale est conservée, mais son ouverture a échoué.';error.style.display='block';error.textContent=String(err?.message||err);}
+ }catch(err){status.textContent='La base originale reste intacte, mais cette amélioration n’a pas pu démarrer.';error.style.display='block';error.textContent=String(err?.message||err);}
 })();
 </script>
 </body>
