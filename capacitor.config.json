@@ -1,0 +1,9 @@
+{
+  "appId": "com.fermeavicole.app",
+  "appName": "Ferme Avicole 3D",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
