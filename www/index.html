@@ -1,24 +1,58 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Élevage de Poulet Tycoon</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#8fd3ff;font-family:Inter,sans-serif}canvas{display:block;touch-action:none}.hud{position:fixed;inset:0;pointer-events:none;color:#342619}.card{position:absolute;background:linear-gradient(145deg,rgba(255,252,239,.94),rgba(245,228,190,.9));border:1px solid rgba(95,65,35,.22);box-shadow:0 8px 25px rgba(45,28,14,.18);backdrop-filter:blur(8px);border-radius:18px;padding:12px 15px}.title{top:max(12px,env(safe-area-inset-top));left:12px;font:700 19px Fredoka}.title small{display:block;font:600 10px Inter;color:#8a5a2c;letter-spacing:.7px}.stats{top:max(12px,env(safe-area-inset-top));right:12px;display:grid;grid-template-columns:repeat(2,auto);gap:5px 13px;font-size:11px}.stats b{font:700 15px Fredoka;color:#b84d2d}.status{left:12px;bottom:max(12px,env(safe-area-inset-bottom));max-width:min(70vw,440px);font-size:11px}.weather{right:12px;bottom:max(12px,env(safe-area-inset-bottom));font:600 12px Fredoka;text-align:right}.controls{position:absolute;right:12px;top:105px;display:flex;flex-direction:column;gap:8px;pointer-events:auto}.btn{border:0;border-radius:13px;padding:10px 12px;background:rgba(255,250,232,.94);box-shadow:0 5px 15px rgba(42,25,12,.16);font:600 12px Inter;color:#4d3423}.loading{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:linear-gradient(#9edaff,#f7d990);font:700 22px Fredoka;color:#6f3d1e;transition:.5s}.loading.hide{opacity:0;pointer-events:none}@media(max-width:620px){.title{font-size:16px}.stats{top:78px;left:12px;right:auto}.controls{top:78px}.card{padding:10px 12px}.status{max-width:62vw}}
+  html, body { margin:0; padding:0; overflow:hidden; width:100%; height:100%; background:#BFE3F0; }
+  canvas { display:block; touch-action:none; cursor:grab; }
+  canvas:active { cursor:grabbing; }
+  #ui { position:fixed; inset:0; pointer-events:none; font-family:'Inter',sans-serif; }
+  .panel {
+    position:absolute; background:rgba(253,248,239,0.88);
+    border:1px solid rgba(74,55,40,0.15); border-radius:14px;
+    padding:14px 18px; color:#4A3728; box-shadow:0 6px 20px rgba(74,55,40,0.12);
+    backdrop-filter:blur(5px);
+  }
+  #title { top:18px; left:18px; font-family:'Fredoka',sans-serif; font-weight:600; font-size:22px; }
+  #title span { display:block; font-family:'Inter',sans-serif; font-weight:400; font-size:12.5px; color:#8B5A2B; margin-top:2px; }
+  #stats { top:18px; right:18px; font-size:13px; font-weight:500; min-width:160px; line-height:1.45; }
+  #stats b { color:#B5482E; font-family:'Fredoka',sans-serif; font-size:16px; }
+  #hint { bottom:18px; left:50%; transform:translateX(-50%); font-size:12.5px; font-weight:500; color:#6b5843; text-align:center; }
+  #event { bottom:62px; left:18px; max-width:min(390px,72vw); font-size:12.5px; line-height:1.35; }
+  #loading {
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background:#F6E7C1; font-family:'Fredoka',sans-serif; font-size:18px; color:#8B5A2B;
+    z-index:10; transition:opacity .5s ease;
+  }
+  @media (max-width:680px){
+    #title{font-size:18px; top:10px; left:10px; padding:11px 13px;}
+    #stats{top:78px; right:10px; min-width:145px; padding:10px 12px;}
+    #hint{bottom:10px; width:88vw; padding:9px 11px;}
+    #event{bottom:58px; left:10px; max-width:56vw; padding:10px 12px;}
+  }
 </style>
 </head>
 <body>
-<div id="loading" class="loading">🐔 Construction de la ferme…</div>
-<div class="hud">
- <div class="card title">Élevage de Poulet Tycoon<small>FERME • COUVOIR • USINE • LIVRAISONS</small></div>
- <div class="card stats"><span>Poules <b id="hens">8</b></span><span>Œufs <b id="eggs">0</b></span><span>Poussins <b id="chicks">0</b></span><span>Caisses <b id="crates">0</b></span><span>Livraisons <b id="deliveries">0</b></span><span>Pièces <b id="coins">0</b></span></div>
- <div id="status" class="card status">Les fermiers préparent le grain et les nids.</div>
- <div class="card weather"><span id="clock">08:00</span><br><span id="weather">☀️ Ensoleillé</span></div>
- <div class="controls"><button id="overview" class="btn">🏡 Vue ferme</button><button id="factory" class="btn">🏭 Voir l’usine</button><button id="speed" class="btn">⏩ Vitesse ×1</button></div>
+<div id="loading">🐔 Préparation de l’exploitation…</div>
+<div id="ui">
+  <div class="panel" id="title">Élevage de Poulet Tycoon<span>Exploitation · nourrissage · ponte · couvaison</span></div>
+  <div class="panel" id="stats">Poules : <b id="hensCount">6</b><br>Œufs pondus : <b id="eggCount">0</b><br>Œufs fécondés : <b id="fertileCount">0</b><br>Poussins nés : <b id="chickCount">0</b></div>
+  <div class="panel" id="hint">Glissez pour tourner · pincez pour zoomer · touchez un animal pour l’entendre</div>
+  <div class="panel" id="event">Le fermier prépare le grain pendant que le coq surveille les poules.</div>
+  <div id="credits" style="position:absolute;bottom:2px;left:8px;font-size:9px;color:rgba(74,55,40,.55)">Sons : caquètement © Breviceps · coq © Wikimedia Commons</div>
+  <button id="resetView" class="panel" style="bottom:60px;right:18px;left:auto;top:auto;pointer-events:auto;border:none;font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;cursor:pointer">🔭 Vue d’ensemble</button>
+  <div class="panel" id="soundHint" style="bottom:60px;left:50%;transform:translateX(-50%);font-size:12px">🔊 Touchez l’écran pour activer le son</div>
 </div>
+<audio id="clackAudio" preload="none" src="https://cdn.freesound.org/previews/456/456803_9159316-lq.mp3"></audio>
+<audio id="crowAudio" preload="none" src="https://commons.wikimedia.org/wiki/Special:FilePath/Rooster_crowing.ogg"></audio>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="core.js"></script>
-<script src="world.js"></script>
-<script src="simulation.js"></script>
-</body></html>
+<script src="game-core.js"></script>
+<script src="game-world.js"></script>
+<script src="game-actors.js"></script>
+<script src="game-loop.js"></script>
+</body>
+</html>
