@@ -1,6 +1,6 @@
 {
   "appId": "com.fermeavicole.app",
-  "appName": "Ferme Avicole 3D",
+  "appName": "Élevage de Poulet Tycoon",
   "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
