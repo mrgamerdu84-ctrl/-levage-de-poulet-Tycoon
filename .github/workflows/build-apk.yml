@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-apk:
@@ -49,11 +49,34 @@ jobs:
         run: |
           mkdir -p artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/elevage-de-poulet-tycoon.apk
+          test -s artifacts/elevage-de-poulet-tycoon.apk
 
       - name: Publier l'APK dans les artefacts
+        id: upload_artifact
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: Elevage-de-Poulet-Tycoon-APK
           path: artifacts/elevage-de-poulet-tycoon.apk
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
+          compression-level: 0
+
+      - name: Publier l'APK dans la Release de test
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="apk-latest"
+          gh release delete "$TAG" --cleanup-tag --yes 2>/dev/null || true
+          gh release create "$TAG" artifacts/elevage-de-poulet-tycoon.apk \
+            --target "$GITHUB_SHA" \
+            --title "APK de test - dernière version" \
+            --notes "APK Android de test compilé automatiquement depuis la branche main. Build GitHub Actions n°${GITHUB_RUN_NUMBER}." \
+            --prerelease
+
+      - name: Résumé de la compilation
+        if: always()
+        run: |
+          echo "## Élevage de Poulet Tycoon" >> "$GITHUB_STEP_SUMMARY"
+          echo "L'APK a été compilé et publié dans la Release **APK de test - dernière version**." >> "$GITHUB_STEP_SUMMARY"
+          echo "État de l'artefact Actions : ${{ steps.upload_artifact.outcome }}" >> "$GITHUB_STEP_SUMMARY"
