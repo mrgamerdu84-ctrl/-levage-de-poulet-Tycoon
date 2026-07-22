@@ -1,0 +1,61 @@
+name: Restaurer la version originale du ZIP
+
+on:
+  push:
+    branches:
+      - restore/version-originale-zip
+    paths:
+      - .github/workflows/restore-original.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  restore-original:
+    name: Restaurer exactement le jeu original
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Récupérer les données de restauration
+        uses: actions/checkout@v4
+        with:
+          ref: restore/version-originale-zip
+          fetch-depth: 0
+
+      - name: Reconstruire et vérifier le fichier original
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .restore/part*.b64 > /tmp/original-index.b64
+          base64 --decode /tmp/original-index.b64 > /tmp/original-index.html
+          echo "683b1c8c654d1a63ca788b4e231e8022c4750af8939fd1f9ca71092d67998be7  /tmp/original-index.html" | sha256sum --check --strict
+          test "$(wc -c < /tmp/original-index.html)" -eq 45900
+          grep -Fq '<title>Ferme avicole — décor 3D</title>' /tmp/original-index.html
+          echo "Fichier original vérifié : 45 900 octets."
+
+      - name: Créer un seul commit de restauration sur main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout -B restore-main origin/main
+          cp /tmp/original-index.html www/index.html
+          echo "683b1c8c654d1a63ca788b4e231e8022c4750af8939fd1f9ca71092d67998be7  www/index.html" | sha256sum --check --strict
+          git add www/index.html
+          if git diff --cached --quiet; then
+            echo "La version originale est déjà présente sur main."
+          else
+            git commit -m "Restaurer exactement la version originale du ZIP"
+            git push origin HEAD:main
+          fi
+
+      - name: Résumé
+        run: |
+          echo "## Version originale restaurée" >> "$GITHUB_STEP_SUMMARY"
+          echo "Le fichier exact du ZIP a été vérifié par SHA-256 puis remis dans \`www/index.html\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "Le prototype de remplacement reste sauvegardé dans \`archive/prototype-html-remplace-par-erreur\`." >> "$GITHUB_STEP_SUMMARY"
