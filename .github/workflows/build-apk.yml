@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: write
-  actions: write
 
 jobs:
   build-apk:
@@ -23,7 +22,7 @@ jobs:
       - name: Installer Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Installer Java 17
         uses: actions/setup-java@v4
@@ -48,54 +47,10 @@ jobs:
 
       - name: Préparer l'APK à télécharger
         run: |
-          mkdir -p artifacts
-          cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/elevage-de-poulet-tycoon.apk
-          test -s artifacts/elevage-de-poulet-tycoon.apk
-          ls -lh artifacts/elevage-de-poulet-tycoon.apk
-
-      - name: Nettoyer les anciens artefacts du dépôt
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          IDS=$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" --jq '.artifacts[].id' || true)
-          if [ -z "$IDS" ]; then
-            echo "Aucun ancien artefact à supprimer."
-          else
-            while read -r ID; do
-              if [ -n "$ID" ]; then
-                gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$ID" || true
-              fi
-            done <<< "$IDS"
-          fi
-
-      - name: Publier l'APK dans les artefacts
-        id: upload_artifact
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: Elevage-de-Poulet-Tycoon-APK
-          path: artifacts/elevage-de-poulet-tycoon.apk
-          if-no-files-found: error
-          retention-days: 1
-          compression-level: 0
-          overwrite: true
-
-      - name: Attendre avant une seconde tentative
-        if: steps.upload_artifact.outcome != 'success'
-        run: sleep 20
-
-      - name: Réessayer la publication de l'artefact
-        id: upload_artifact_retry
-        if: steps.upload_artifact.outcome != 'success'
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: Elevage-de-Poulet-Tycoon-APK-secours
-          path: artifacts/elevage-de-poulet-tycoon.apk
-          if-no-files-found: error
-          retention-days: 1
-          compression-level: 0
-          overwrite: true
+          mkdir -p release
+          cp android/app/build/outputs/apk/debug/app-debug.apk release/elevage-de-poulet-tycoon.apk
+          test -s release/elevage-de-poulet-tycoon.apk
+          ls -lh release/elevage-de-poulet-tycoon.apk
 
       - name: Publier l'APK dans la Release de test
         env:
@@ -103,19 +58,15 @@ jobs:
         run: |
           TAG="apk-latest"
           gh release delete "$TAG" --cleanup-tag --yes 2>/dev/null || true
-          gh release create "$TAG" artifacts/elevage-de-poulet-tycoon.apk \
+          gh release create "$TAG" release/elevage-de-poulet-tycoon.apk \
             --target "$GITHUB_SHA" \
             --title "APK de test - dernière version" \
             --notes "APK Android de test compilé automatiquement depuis la branche main. Build GitHub Actions n°${GITHUB_RUN_NUMBER}." \
             --prerelease
 
       - name: Résumé de la compilation
-        if: always()
         run: |
           echo "## Élevage de Poulet Tycoon" >> "$GITHUB_STEP_SUMMARY"
-          echo "L'APK a été compilé et publié dans la Release **APK de test - dernière version**." >> "$GITHUB_STEP_SUMMARY"
-          echo "Première tentative d'artefact : ${{ steps.upload_artifact.outcome }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "Seconde tentative d'artefact : ${{ steps.upload_artifact_retry.outcome }}" >> "$GITHUB_STEP_SUMMARY"
-          if [ "${{ steps.upload_artifact.outcome }}" != "success" ] && [ "${{ steps.upload_artifact_retry.outcome }}" != "success" ]; then
-            echo "⚠️ GitHub a refusé le stockage de l'artefact. Télécharge l'APK dans la Release de test." >> "$GITHUB_STEP_SUMMARY"
-          fi
+          echo "✅ L'APK a été compilé avec succès." >> "$GITHUB_STEP_SUMMARY"
+          echo "📦 Téléchargement : **Releases → APK de test - dernière version**." >> "$GITHUB_STEP_SUMMARY"
+          echo "Fichier : \`elevage-de-poulet-tycoon.apk\`" >> "$GITHUB_STEP_SUMMARY"
