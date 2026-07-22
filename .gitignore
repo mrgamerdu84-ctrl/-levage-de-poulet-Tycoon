@@ -1,0 +1,12 @@
+node_modules/
+.gradle/
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/captures/
+android/*.iml
+android/.idea/
+*.apk
+*.aab
+.DS_Store
