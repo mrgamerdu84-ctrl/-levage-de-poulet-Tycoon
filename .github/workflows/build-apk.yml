@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   build-apk:
@@ -50,6 +51,22 @@ jobs:
           mkdir -p artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/elevage-de-poulet-tycoon.apk
           test -s artifacts/elevage-de-poulet-tycoon.apk
+          ls -lh artifacts/elevage-de-poulet-tycoon.apk
+
+      - name: Nettoyer les anciens artefacts du dépôt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          IDS=$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" --jq '.artifacts[].id' || true)
+          if [ -z "$IDS" ]; then
+            echo "Aucun ancien artefact à supprimer."
+          else
+            while read -r ID; do
+              if [ -n "$ID" ]; then
+                gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$ID" || true
+              fi
+            done <<< "$IDS"
+          fi
 
       - name: Publier l'APK dans les artefacts
         id: upload_artifact
@@ -59,8 +76,26 @@ jobs:
           name: Elevage-de-Poulet-Tycoon-APK
           path: artifacts/elevage-de-poulet-tycoon.apk
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
           compression-level: 0
+          overwrite: true
+
+      - name: Attendre avant une seconde tentative
+        if: steps.upload_artifact.outcome != 'success'
+        run: sleep 20
+
+      - name: Réessayer la publication de l'artefact
+        id: upload_artifact_retry
+        if: steps.upload_artifact.outcome != 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: Elevage-de-Poulet-Tycoon-APK-secours
+          path: artifacts/elevage-de-poulet-tycoon.apk
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+          overwrite: true
 
       - name: Publier l'APK dans la Release de test
         env:
@@ -79,4 +114,8 @@ jobs:
         run: |
           echo "## Élevage de Poulet Tycoon" >> "$GITHUB_STEP_SUMMARY"
           echo "L'APK a été compilé et publié dans la Release **APK de test - dernière version**." >> "$GITHUB_STEP_SUMMARY"
-          echo "État de l'artefact Actions : ${{ steps.upload_artifact.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Première tentative d'artefact : ${{ steps.upload_artifact.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Seconde tentative d'artefact : ${{ steps.upload_artifact_retry.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.upload_artifact.outcome }}" != "success" ] && [ "${{ steps.upload_artifact_retry.outcome }}" != "success" ]; then
+            echo "⚠️ GitHub a refusé le stockage de l'artefact. Télécharge l'APK dans la Release de test." >> "$GITHUB_STEP_SUMMARY"
+          fi
