@@ -2,48 +2,57 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Ferme avicole — amélioration reproduction</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Élevage de Poulet Tycoon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f6e7c1;font-family:Arial,sans-serif;color:#6b4423}body{display:grid;place-items:center}.card{width:min(86vw,420px);padding:24px;border-radius:22px;background:rgba(255,250,235,.96);box-shadow:0 18px 55px rgba(71,42,18,.28);text-align:center;border:1px solid rgba(107,68,35,.18)}.icon{font-size:58px}.title{font-size:22px;font-weight:800;margin:8px 0}.status{font-size:13px;line-height:1.5;color:#76583e}.bar{height:10px;border-radius:999px;background:#dfcfad;overflow:hidden;margin-top:18px}.fill{height:100%;width:25%;border-radius:inherit;background:linear-gradient(90deg,#79a94c,#e0ad43);animation:load 1.2s ease-in-out infinite alternate}@keyframes load{to{width:92%}}#error{display:none;color:#a12c24;margin-top:14px;font-size:12px;white-space:pre-wrap}
+  html, body { margin:0; padding:0; overflow:hidden; width:100%; height:100%; background:#BFE3F0; }
+  canvas { display:block; touch-action:none; cursor:grab; }
+  canvas:active { cursor:grabbing; }
+  #ui { position:fixed; inset:0; pointer-events:none; font-family:'Inter',sans-serif; padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); box-sizing:border-box; }
+  .panel {
+    position:absolute; background:rgba(253,248,239,0.88);
+    border:1px solid rgba(74,55,40,0.15); border-radius:14px;
+    padding:14px 18px; color:#4A3728; box-shadow:0 6px 20px rgba(74,55,40,0.12);
+    backdrop-filter:blur(5px);
+  }
+  #title { top:18px; left:18px; font-family:'Fredoka',sans-serif; font-weight:600; font-size:22px; }
+  #title span { display:block; font-family:'Inter',sans-serif; font-weight:400; font-size:12.5px; color:#8B5A2B; margin-top:2px; }
+  #stats { top:18px; right:18px; font-size:13px; font-weight:500; min-width:160px; line-height:1.45; }
+  #stats b { color:#B5482E; font-family:'Fredoka',sans-serif; font-size:16px; }
+  #hint { bottom:18px; left:50%; transform:translateX(-50%); font-size:12.5px; font-weight:500; color:#6b5843; text-align:center; }
+  #event { bottom:62px; left:18px; max-width:min(390px,72vw); font-size:12.5px; line-height:1.35; }
+  #loading {
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background:#F6E7C1; font-family:'Fredoka',sans-serif; font-size:18px; color:#8B5A2B;
+    z-index:10; transition:opacity .5s ease;
+  }
+  @media (max-width:680px){
+    #title{font-size:18px; top:10px; left:10px; padding:11px 13px;}
+    #stats{top:78px; right:10px; min-width:145px; padding:10px 12px;}
+    #hint{bottom:10px; width:88vw; padding:9px 11px;}
+    #event{bottom:58px; left:10px; max-width:56vw; padding:10px 12px;}
+  }
 </style>
 </head>
 <body>
-<div class="card"><div class="icon">🐔</div><div class="title">Amélioration de ta ferme</div><div class="status" id="status">Chargement de ta version originale…</div><div class="bar"><div class="fill"></div></div><div id="error"></div></div>
-<script>
-'use strict';
-(async()=>{
- const status=document.getElementById('status'),error=document.getElementById('error');
- try{
-  const originalNames=['00','01','02','03','04','05','06','07'],originalParts=[];
-  for(const name of originalNames){
-   status.textContent=`Chargement de la base originale… ${Number(name)+1}/8`;
-   const response=await fetch(`original/part${name}.b64`,{cache:'force-cache'});
-   if(!response.ok)throw new Error(`Base originale manquante : part${name}`);
-   originalParts.push((await response.text()).trim());
-  }
-  const binary=atob(originalParts.join('')),bytes=new Uint8Array(binary.length);
-  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-  if(bytes.length!==45900)throw new Error(`Taille originale incorrecte : ${bytes.length}`);
-  let html=new TextDecoder('utf-8').decode(bytes);
-  const patchNames=['00','01','02','03','04'],patchParts=[];
-  for(const name of patchNames){
-   status.textContent=`Application des améliorations… ${Number(name)+1}/5`;
-   const response=await fetch(`patches/reproduction-v1/part${name}.txt`,{cache:'no-store'});
-   if(!response.ok)throw new Error(`Amélioration manquante : part${name}`);
-   patchParts.push(await response.text());
-  }
-  const patchCode=patchParts.join('').replace(
-   "if(i<0)throw new Error('Patch introuvable: '+label);",
-   "if(i<0){if(label==='oldconveyorloop')return text;throw new Error('Patch introuvable: '+label);}"
-  );
-  new Function(patchCode)();
-  if(typeof window.applyReproductionV1!=='function')throw new Error('Le correctif de reproduction ne s’est pas chargé.');
-  html=window.applyReproductionV1(html);
-  if(!html.includes('Œufs fécondés')||html.includes('CONVEYOR BELT'))throw new Error('La vérification finale de la ferme a échoué.');
-  document.open();document.write(html);document.close();
- }catch(err){status.textContent='La base originale reste intacte, mais cette amélioration n’a pas pu démarrer.';error.style.display='block';error.textContent=String(err?.message||err);}
-})();
-</script>
+<div id="loading">🐔 Préparation de l’exploitation…</div>
+<div id="ui">
+  <div class="panel" id="title">Élevage de Poulet Tycoon<span>Exploitation · nourrissage · ponte · couvaison</span></div>
+  <div class="panel" id="stats">Poules : <b id="hensCount">6</b><br>Œufs pondus : <b id="eggCount">0</b><br>Œufs fécondés : <b id="fertileCount">0</b><br>Poussins nés : <b id="chickCount">0</b></div>
+  <div class="panel" id="hint">Glissez pour tourner · pincez pour zoomer · touchez un animal pour l’entendre</div>
+  <div class="panel" id="event">Le fermier prépare le grain pendant que le coq surveille les poules.</div>
+  <div id="credits" style="position:absolute;bottom:2px;left:8px;font-size:9px;color:rgba(74,55,40,.55)">Sons : caquètement © Breviceps · coq © Wikimedia Commons</div>
+  <button id="resetView" class="panel" style="bottom:60px;right:18px;left:auto;top:auto;pointer-events:auto;border:none;font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;cursor:pointer">🔭 Vue d’ensemble</button>
+  <div class="panel" id="soundHint" style="bottom:60px;left:50%;transform:translateX(-50%);font-size:12px">🔊 Touchez l’écran pour activer le son</div>
+</div>
+<audio id="clackAudio" preload="none" src="https://cdn.freesound.org/previews/456/456803_9159316-lq.mp3"></audio>
+<audio id="crowAudio" preload="none" src="https://commons.wikimedia.org/wiki/Special:FilePath/Rooster_crowing.ogg"></audio>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="game-core.js"></script>
+<script src="game-world.js"></script>
+<script src="game-actors.js"></script>
+<script src="game-loop.js"></script>
 </body>
 </html>
