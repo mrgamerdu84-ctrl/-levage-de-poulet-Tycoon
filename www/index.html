@@ -3,156 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Élevage de Poulet Tycoon</title>
+<title>Restauration de la Ferme avicole</title>
 <style>
-:root{color-scheme:dark;--glass:rgba(24,32,20,.82);--gold:#ffd36a;--cream:#fff6df;--green:#5fbf4b}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-#game{position:fixed;inset:0;width:100%;height:100%;touch-action:none;background:linear-gradient(#b7dcf0,#78a655)}
-#hud{position:fixed;inset:0;pointer-events:none;padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;justify-content:space-between}
-.top{display:flex;gap:7px;align-items:center;flex-wrap:wrap;filter:drop-shadow(0 3px 7px rgba(0,0,0,.45))}
-.brand,.stat,.toast,.roundBtn,#actionBtn{border:1px solid rgba(255,255,255,.22);background:linear-gradient(180deg,rgba(49,63,39,.94),rgba(24,31,20,.92));box-shadow:inset 0 1px rgba(255,255,255,.13),0 5px 14px rgba(0,0,0,.25);color:var(--cream)}
-.brand{padding:9px 12px;border-radius:14px;font-weight:900;letter-spacing:.2px;font-size:clamp(12px,3vw,16px)}
-.stat{padding:7px 10px;border-radius:13px;font-weight:800;font-size:13px;display:flex;gap:6px;align-items:center}.stat b{color:var(--gold)}
-#toast{align-self:center;margin-top:8px;max-width:min(92vw,660px);padding:8px 14px;border-radius:999px;font-size:12px;text-align:center;opacity:0;transform:translateY(-8px);transition:.25s}.show{opacity:1!important;transform:none!important}
-.controls{display:flex;justify-content:space-between;align-items:flex-end}
-#joystick{pointer-events:auto;width:124px;height:124px;border-radius:50%;position:relative;background:radial-gradient(circle,rgba(255,255,255,.18) 0 36%,rgba(20,28,16,.58) 38% 68%,rgba(255,255,255,.12) 70%);border:2px solid rgba(255,255,255,.24);box-shadow:0 8px 22px rgba(0,0,0,.32),inset 0 0 18px rgba(0,0,0,.25);touch-action:none}
-#stick{position:absolute;width:54px;height:54px;border-radius:50%;left:33px;top:33px;background:radial-gradient(circle at 35% 30%,#f4e1ac,#7f5e2c 72%);border:2px solid rgba(255,255,255,.35);box-shadow:0 5px 12px rgba(0,0,0,.45)}
-.rightControls{pointer-events:auto;display:flex;gap:9px;align-items:flex-end}
-.roundBtn,#actionBtn{border-radius:50%;border-width:1px;font-weight:900;display:grid;place-items:center;cursor:pointer;color:white}
-.roundBtn{width:52px;height:52px;font-size:21px}
-#actionBtn{width:84px;height:84px;border-radius:50%;font-size:13px;line-height:1.05;padding:8px;background:radial-gradient(circle at 35% 25%,#ffdf72,#bd7418 68%,#70400d);text-shadow:0 2px 2px rgba(0,0,0,.6);border:3px solid rgba(255,255,255,.48)}
-button:active{transform:scale(.94)}
-#start{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,rgba(255,204,84,.18),rgba(10,13,9,.78));z-index:5;transition:.4s}
-#start.hidden{opacity:0;pointer-events:none}
-.startCard{text-align:center;background:rgba(28,36,23,.9);border:1px solid rgba(255,255,255,.22);border-radius:24px;padding:20px 24px;box-shadow:0 20px 60px rgba(0,0,0,.45);max-width:330px}.startCard h1{font-size:25px;margin:0 0 8px;color:#ffd76e}.startCard p{font-size:13px;line-height:1.4;color:#eee3c8}.startCard button{border:0;border-radius:999px;padding:12px 20px;font-weight:900;background:linear-gradient(#ffd96d,#d98a20);color:#37200b;font-size:15px}
-@media(max-width:560px){#hud{padding-left:7px;padding-right:7px}.brand{width:100%;padding:7px 10px}.stat{font-size:11px;padding:6px 8px}#joystick{width:112px;height:112px}#stick{left:29px;top:29px}#actionBtn{width:76px;height:76px}.roundBtn{width:46px;height:46px}}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f6e7c1;font-family:Arial,sans-serif;color:#6b4423}
+body{display:grid;place-items:center}
+.card{width:min(86vw,420px);padding:24px;border-radius:22px;background:rgba(255,250,235,.96);box-shadow:0 18px 55px rgba(71,42,18,.28);text-align:center;border:1px solid rgba(107,68,35,.18)}
+.icon{font-size:58px}.title{font-size:22px;font-weight:800;margin:8px 0}.status{font-size:13px;line-height:1.5;color:#76583e}.bar{height:10px;border-radius:999px;background:#dfcfad;overflow:hidden;margin-top:18px}.fill{height:100%;width:25%;border-radius:inherit;background:linear-gradient(90deg,#79a94c,#e0ad43);animation:load 1.2s ease-in-out infinite alternate}@keyframes load{to{width:92%}}
+#error{display:none;color:#a12c24;margin-top:14px;font-size:12px;white-space:pre-wrap}
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
-<div id="hud">
-  <div>
-    <div class="top">
-      <div class="brand">🐓 Élevage de Poulet Tycoon</div>
-      <div class="stat">🥚 Œufs <b id="eggsCount">0</b></div>
-      <div class="stat">🪙 Pièces <b id="coinsCount">0</b></div>
-      <div class="stat">🐥 Poussins <b id="chicksCount">0</b></div>
-      <div class="stat">🌾 Grain <b id="feedCount">100</b>%</div>
-    </div>
-    <div id="toast" class="toast">Bienvenue dans ton élevage.</div>
-  </div>
-  <div class="controls">
-    <div id="joystick"><div id="stick"></div></div>
-    <div class="rightControls">
-      <button id="soundBtn" class="roundBtn" aria-label="Son">🔊</button>
-      <button id="viewBtn" class="roundBtn" aria-label="Centrer">🎯</button>
-      <button id="actionBtn">ACTION</button>
-    </div>
-  </div>
+<div class="card">
+  <div class="icon">🐔</div>
+  <div class="title">Restauration de ta ferme originale</div>
+  <div class="status" id="status">Chargement du fichier exact que tu avais fourni au début…</div>
+  <div class="bar"><div class="fill"></div></div>
+  <div id="error"></div>
 </div>
-<div id="start"><div class="startCard"><h1>Une ferme vivante</h1><p>Déplace le fermier, ramasse les œufs, remplis la mangeoire et observe les œufs fécondés éclore.</p><button id="playBtn">Commencer</button></div></div>
-<audio id="cluck" preload="none" crossorigin="anonymous" src="https://commons.wikimedia.org/wiki/Special:FilePath/Chickens%20demanding%20food.ogg"></audio>
-<audio id="crow" preload="none" crossorigin="anonymous" src="https://commons.wikimedia.org/wiki/Special:FilePath/Rooster%20crowing.ogg"></audio>
 <script>
 'use strict';
-(() => {
-const canvas=document.getElementById('game'),ctx=canvas.getContext('2d',{alpha:false});
-const UI={eggs:document.getElementById('eggsCount'),coins:document.getElementById('coinsCount'),chicks:document.getElementById('chicksCount'),feed:document.getElementById('feedCount'),toast:document.getElementById('toast')};
-const W=960,H=640,YARD={l:52,r:908,t:164,b:598};
-let viewScale=1,viewX=0,viewY=0,last=performance.now(),time=0,toastTimer=0,soundOn=true,started=false;
-let score={eggs:0,coins:0,chicks:0,feed:100};
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-const rand=(a,b)=>a+Math.random()*(b-a);
-const angleLerp=(a,b,t)=>{let d=((b-a+Math.PI*3)%(Math.PI*2))-Math.PI;return a+d*t};
-function seeded(n){return()=>{n=(n*1664525+1013904223)>>>0;return n/4294967296}}
-function makePattern(type,size=128){const c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d');const r=seeded(type.length*9167+size);
- if(type==='grass'){const gr=g.createLinearGradient(0,0,size,size);gr.addColorStop(0,'#648f3d');gr.addColorStop(.5,'#497b32');gr.addColorStop(1,'#365f29');g.fillStyle=gr;g.fillRect(0,0,size,size);for(let i=0;i<380;i++){const x=r()*size,y=r()*size,l=2+r()*6;g.strokeStyle=`rgba(${30+r()*45|0},${85+r()*85|0},${25+r()*35|0},${.25+r()*.45})`;g.lineWidth=.5+r()*1.2;g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+(r()-.5)*2,y-l*.55,x+(r()-.5)*3,y-l);g.stroke()}for(let i=0;i<35;i++){g.fillStyle=`rgba(70,45,20,${.12+r()*.16})`;g.beginPath();g.arc(r()*size,r()*size,1+r()*2,0,7);g.fill()}}
- if(type==='soil'){g.fillStyle='#8b673f';g.fillRect(0,0,size,size);for(let i=0;i<260;i++){const q=r()*255|0;g.fillStyle=`rgba(${70+q*.18|0},${45+q*.12|0},${24+q*.06|0},${.15+r()*.35})`;g.beginPath();g.ellipse(r()*size,r()*size,1+r()*4,.5+r()*2,r()*6,0,7);g.fill()}}
- if(type==='wood'){g.fillStyle='#85502d';g.fillRect(0,0,size,size);for(let y=0;y<size;y+=16){g.fillStyle=y%32?'#9e6338':'#7e4728';g.fillRect(0,y,size,15);g.strokeStyle='rgba(45,21,10,.55)';g.strokeRect(0,y,size,15);for(let x=8;x<size;x+=32){g.fillStyle='rgba(50,24,12,.35)';g.beginPath();g.ellipse(x+(r()-.5)*5,y+7,3+r()*3,1+r(),0,0,7);g.fill()}}for(let i=0;i<45;i++){g.strokeStyle='rgba(255,205,130,.12)';g.beginPath();g.moveTo(0,r()*size);g.bezierCurveTo(size*.3,r()*size,size*.7,r()*size,size,r()*size);g.stroke()}}
- if(type==='straw'){g.fillStyle='#ad7728';g.fillRect(0,0,size,size);for(let i=0;i<250;i++){g.strokeStyle=`rgba(${180+r()*70|0},${110+r()*85|0},${25+r()*35|0},${.45+r()*.45})`;g.lineWidth=.7+r()*1.5;const x=r()*size,y=r()*size,a=r()*6.28,l=4+r()*11;g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);g.stroke()}}
- return ctx.createPattern(c,'repeat')}
-const PAT={grass:makePattern('grass'),soil:makePattern('soil'),wood:makePattern('wood'),straw:makePattern('straw')};
-function resize(){const d=Math.min(devicePixelRatio||1,2);canvas.width=innerWidth*d;canvas.height=innerHeight*d;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';viewScale=Math.min(innerWidth/W,innerHeight/H);viewX=(innerWidth-W*viewScale)/2;viewY=(innerHeight-H*viewScale)/2;ctx.setTransform(d,0,0,d,0,0)}
-addEventListener('resize',resize);resize();
-function screenPoint(e){const rect=canvas.getBoundingClientRect();return{x:(e.clientX-rect.left-viewX)/viewScale,y:(e.clientY-rect.top-viewY)/viewScale}}
-function showToast(msg){UI.toast.textContent=msg;UI.toast.classList.add('show');toastTimer=3.2}
-function updateUI(){UI.eggs.textContent=score.eggs;UI.coins.textContent=score.coins;UI.chicks.textContent=score.chicks;UI.feed.textContent=Math.round(score.feed)}
-function playAudio(el,vol=.25){if(!soundOn||!started)return;try{el.volume=vol;el.currentTime=0;el.play().catch(()=>{})}catch(_){}}
-const cluck=document.getElementById('cluck'),crow=document.getElementById('crow');
-const nests=[{x:142,y:142,egg:null,hen:null},{x:224,y:142,egg:null,hen:null},{x:306,y:142,egg:null,hen:null},{x:365,y:188,egg:null,hen:null}];
-const feeder={x:465,y:310},waterer={x:575,y:326},market={x:823,y:235};
-const farmer={x:510,y:470,r:15,speed:130,dir:-Math.PI/2,walk:0,target:null,carried:0};
-const worker={x:735,y:455,dir:Math.PI,phase:0};
-const colors=['#e9d9ba','#b96e3d','#f2ead8','#8c4d2c','#d1a26b','#6c3c27'];
-function makeHen(i){return{x:rand(170,770),y:rand(250,530),vx:0,vy:0,dir:rand(0,6.28),speed:rand(18,28),state:'wander',timer:rand(4,10),lay:rand(16,35),hungry:rand(0,.7),thirst:rand(0,.5),nest:null,fertileUntil:0,broody:i>=4,color:colors[i%colors.length],phase:rand(0,6.28),scale:rand(.9,1.08)}}
-const hens=Array.from({length:6},(_,i)=>makeHen(i));
-const rooster={x:345,y:350,dir:0,speed:34,state:'wander',timer:7,target:null,phase:0};
-const eggs=[],chicks=[];
-function safeMove(a,dx,dy){a.x=clamp(a.x+dx,YARD.l+20,YARD.r-20);a.y=clamp(a.y+dy,YARD.t+22,YARD.b-18)}
-function chooseWander(a){a.dir+=rand(-1.5,1.5);a.timer=rand(2,6)}
-function moveToward(a,p,s,dt){const dx=p.x-a.x,dy=p.y-a.y,d=Math.hypot(dx,dy);if(d<3)return true;a.dir=angleLerp(a.dir,Math.atan2(dy,dx),.12);safeMove(a,dx/d*s*dt,dy/d*s*dt);return d<8}
-function spawnEgg(hen,nest){const e={x:nest.x,y:nest.y+18,fertilized:hen.fertileUntil>time,incubating:false,age:0,nest,hen,wobble:rand(0,6.28)};eggs.push(e);nest.egg=e;score.feed=clamp(score.feed-5,0,100);playAudio(cluck,.18);showToast(e.fertilized?'Un œuf fécondé vient d’être pondu.':'Une poule vient de pondre dans son nid.');return e}
-function removeEgg(e){const i=eggs.indexOf(e);if(i>=0)eggs.splice(i,1);if(e.nest&&e.nest.egg===e)e.nest.egg=null}
-function hatch(e){const p={x:e.x+rand(-12,12),y:e.y+rand(8,18),dir:rand(0,6.28),phase:rand(0,6.28),timer:rand(2,5)};chicks.push(p);score.chicks++;removeEgg(e);showToast('🐥 Un poussin vient d’éclore !');updateUI()}
-function updateRooster(dt){rooster.timer-=dt;rooster.phase+=dt*7;if(rooster.state==='wander'){safeMove(rooster,Math.cos(rooster.dir)*rooster.speed*dt,Math.sin(rooster.dir)*rooster.speed*dt);if(rooster.timer<=0){if(Math.random()<.48){rooster.target=hens[Math.random()*hens.length|0];rooster.state='court';rooster.timer=8}else chooseWander(rooster)}}else if(rooster.state==='court'){if(!rooster.target){rooster.state='wander';return}if(moveToward(rooster,rooster.target,42,dt)){rooster.target.fertileUntil=time+55;rooster.state='display';rooster.timer=2.4;showToast('Le coq rejoint une poule : son prochain œuf pourra être fécondé.')}else if(rooster.timer<=0){rooster.state='wander';rooster.timer=5}}else if(rooster.state==='display'){rooster.dir+=dt*2.2;if(rooster.timer<=0){rooster.state='wander';rooster.timer=rand(7,13)}}}
-function updateHen(h,dt){h.phase+=dt*7;h.timer-=dt;h.lay-=dt;h.hungry=clamp(h.hungry+dt*.018,0,1);h.thirst=clamp(h.thirst+dt*.014,0,1);
- if(h.state==='wander'){const s=h.speed*(h.hungry>.7?1.15:1);safeMove(h,Math.cos(h.dir)*s*dt,Math.sin(h.dir)*s*dt);if(h.timer<=0)chooseWander(h);if(h.hungry>.72&&score.feed>0){h.state='feed';h.timer=12}else if(h.thirst>.72){h.state='water';h.timer=12}else if(h.lay<=0){const n=nests.find(n=>!n.hen&&!n.egg);if(n){h.nest=n;n.hen=h;h.state='nest';h.timer=14}}}
- else if(h.state==='feed'){if(moveToward(h,feeder,h.speed*1.3,dt)){h.hungry=0;score.feed=clamp(score.feed-dt*1.8,0,100);if(h.timer<8){h.state='wander';chooseWander(h)}}else if(h.timer<=0){h.state='wander';chooseWander(h)}}
- else if(h.state==='water'){if(moveToward(h,waterer,h.speed*1.25,dt)){h.thirst=0;h.state='wander';chooseWander(h)}else if(h.timer<=0){h.state='wander';chooseWander(h)}}
- else if(h.state==='nest'){if(moveToward(h,h.nest,h.speed*1.2,dt)){h.state='laying';h.timer=3.2;h.x=h.nest.x;h.y=h.nest.y+2;showToast('Une poule s’installe dans la paille pour pondre.')}else if(h.timer<=0){h.nest.hen=null;h.nest=null;h.state='wander';chooseWander(h)}}
- else if(h.state==='laying'){if(h.timer<=0){const e=spawnEgg(h,h.nest);h.lay=rand(24,42);if(e.fertilized&&h.broody){e.incubating=true;h.state='brood';h.timer=22}else{h.nest.hen=null;h.nest=null;h.state='wander';chooseWander(h)}}}
- else if(h.state==='brood'){const e=h.nest&&h.nest.egg;if(!e){h.state='wander';h.nest=null;chooseWander(h);return}e.age+=dt;if(e.age>=22){hatch(e);h.nest.hen=null;h.nest=null;h.state='wander';chooseWander(h)}}
-}
-function updateChicks(dt){for(const c of chicks){c.phase+=dt*10;c.timer-=dt;if(c.timer<=0){c.dir+=rand(-1.8,1.8);c.timer=rand(1.5,4)}safeMove(c,Math.cos(c.dir)*15*dt,Math.sin(c.dir)*15*dt)}}
-const input={x:0,y:0,keys:new Set()};
-addEventListener('keydown',e=>input.keys.add(e.key.toLowerCase()));addEventListener('keyup',e=>input.keys.delete(e.key.toLowerCase()));
-const joy=document.getElementById('joystick'),stick=document.getElementById('stick');let joyId=null;
-function joyMove(e){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,m=Math.hypot(dx,dy),max=r.width*.32,k=m>max?max/m:1;input.x=dx*k/max;input.y=dy*k/max;stick.style.transform=`translate(${dx*k}px,${dy*k}px)`}
-joystick.addEventListener('pointerdown',e=>{joyId=e.pointerId;joy.setPointerCapture(joyId);joyMove(e)});joy.addEventListener('pointermove',e=>{if(e.pointerId===joyId)joyMove(e)});function joyEnd(e){if(e.pointerId!==joyId)return;joyId=null;input.x=input.y=0;stick.style.transform=''}joy.addEventListener('pointerup',joyEnd);joy.addEventListener('pointercancel',joyEnd);
-canvas.addEventListener('pointerdown',e=>{if(!started)return;const p=screenPoint(e);farmer.target=p});
-function updateFarmer(dt){let x=input.x+(input.keys.has('arrowright')||input.keys.has('d')?1:0)-(input.keys.has('arrowleft')||input.keys.has('a')?1:0),y=input.y+(input.keys.has('arrowdown')||input.keys.has('s')?1:0)-(input.keys.has('arrowup')||input.keys.has('w')?1:0);let m=Math.hypot(x,y);if(m>.1){farmer.target=null;x/=m;y/=m;farmer.dir=Math.atan2(y,x);safeMove(farmer,x*farmer.speed*dt,y*farmer.speed*dt);farmer.walk+=dt*9}else if(farmer.target){const dx=farmer.target.x-farmer.x,dy=farmer.target.y-farmer.y,d=Math.hypot(dx,dy);if(d>5){farmer.dir=Math.atan2(dy,dx);safeMove(farmer,dx/d*farmer.speed*dt,dy/d*farmer.speed*dt);farmer.walk+=dt*9}else farmer.target=null}
- for(const e of [...eggs]){if(!e.incubating&&dist(farmer,e)<28){removeEgg(e);score.eggs++;farmer.carried=score.eggs;showToast('Œuf ramassé ! Apporte-le au panier de vente.');updateUI()}}
- if(score.eggs>0&&dist(farmer,market)<40){const sold=score.eggs;score.eggs=0;score.coins+=sold*4;farmer.carried=0;showToast(`Vente terminée : +${sold*4} pièces.`);updateUI()}
- if(score.feed<20&&dist(farmer,feeder)<42){score.feed=100;showToast('La mangeoire est remplie de grain frais.');updateUI()}}
-function action(){const loose=eggs.filter(e=>!e.incubating).sort((a,b)=>dist(farmer,a)-dist(farmer,b))[0];if(loose&&dist(farmer,loose)<100){farmer.target={x:loose.x,y:loose.y};showToast('Le fermier va ramasser l’œuf.');return}if(score.eggs>0){farmer.target={x:market.x,y:market.y};showToast('Le fermier apporte les œufs au panier de vente.');return}if(score.feed<65){farmer.target={x:feeder.x,y:feeder.y};showToast('Le fermier va remplir la mangeoire.');return}showToast('Observe les poules : certaines cherchent déjà un nid.')}
-document.getElementById('actionBtn').onclick=action;document.getElementById('viewBtn').onclick=()=>{farmer.target={x:510,y:470};showToast('Retour au centre de l’enclos.')};document.getElementById('soundBtn').onclick=e=>{soundOn=!soundOn;e.currentTarget.textContent=soundOn?'🔊':'🔇';showToast(soundOn?'Sons activés.':'Sons coupés.')};
-function startGame(){started=true;document.getElementById('start').classList.add('hidden');playAudio(crow,.24);showToast('Le coq surveille l’enclos. Les poules cherchent du grain.')}
-document.getElementById('playBtn').onclick=startGame;document.getElementById('start').addEventListener('pointerdown',e=>{if(e.target.id==='start')startGame()});
-function roundRect(g,x,y,w,h,r){g.beginPath();g.roundRect(x,y,w,h,r)}
-function drawGround(){ctx.fillStyle='#a9d083';ctx.fillRect(0,0,W,H);ctx.fillStyle=PAT.grass;ctx.fillRect(0,0,W,H);const sky=ctx.createLinearGradient(0,0,0,180);sky.addColorStop(0,'rgba(190,226,244,.9)');sky.addColorStop(1,'rgba(255,226,147,.12)');ctx.fillStyle=sky;ctx.fillRect(0,0,W,165);
- ctx.save();ctx.beginPath();ctx.moveTo(380,0);ctx.bezierCurveTo(470,110,560,115,655,170);ctx.lineTo(780,210);ctx.lineTo(700,255);ctx.bezierCurveTo(580,210,500,205,410,145);ctx.lineTo(325,0);ctx.closePath();ctx.fillStyle=PAT.soil;ctx.fill();ctx.globalAlpha=.22;ctx.strokeStyle='#d7b47b';ctx.lineWidth=8;ctx.stroke();ctx.restore();
- for(let i=0;i<115;i++){const x=(i*83%900)+25,y=190+(i*137%390);ctx.strokeStyle=i%3?'rgba(45,110,35,.55)':'rgba(124,168,48,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+2,y-5,x+(i%2?4:-3),y-10-(i%5));ctx.stroke()}}
-function drawFence(){ctx.save();ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=5;ctx.shadowOffsetY=4;const posts=[];for(let x=55;x<=905;x+=70){posts.push([x,165],[x,598])}for(let y=165;y<=598;y+=72){posts.push([55,y],[905,y])}ctx.strokeStyle='#704426';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(55,178);ctx.lineTo(905,178);ctx.moveTo(55,584);ctx.lineTo(905,584);ctx.moveTo(67,165);ctx.lineTo(67,598);ctx.moveTo(893,165);ctx.lineTo(893,598);ctx.stroke();for(const [x,y] of posts){ctx.fillStyle='#89532d';roundRect(ctx,x-5,y-13,10,26,3);ctx.fill();ctx.fillStyle='rgba(255,207,133,.25)';ctx.fillRect(x-3,y-10,2,18)}ctx.restore()}
-function drawTree(x,y,s=1){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=12;ctx.shadowOffsetY=8;ctx.strokeStyle='#5c3924';ctx.lineWidth=14;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(0,38);ctx.lineTo(2,-35);ctx.moveTo(0,-18);ctx.lineTo(-25,-45);ctx.moveTo(2,-27);ctx.lineTo(28,-52);ctx.stroke();const blobs=[[-30,-56,27],[-5,-72,34],[28,-59,31],[-24,-88,29],[15,-94,35],[45,-84,25],[0,-112,29]];for(const [bx,by,r] of blobs){const gr=ctx.createRadialGradient(bx-8,by-10,3,bx,by,r);gr.addColorStop(0,'#8ebd55');gr.addColorStop(.55,'#4e873f');gr.addColorStop(1,'#285a31');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(bx,by,r,0,7);ctx.fill()}ctx.restore()}
-function drawBush(x,y,s=1){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.shadowColor='rgba(0,0,0,.25)';ctx.shadowBlur=6;ctx.shadowOffsetY=4;for(let i=0;i<7;i++){const a=i/7*6.28,r=10+(i%2)*6,px=Math.cos(a)*r,py=Math.sin(a)*r*.45;const gr=ctx.createRadialGradient(px-3,py-4,1,px,py,16);gr.addColorStop(0,'#91c563');gr.addColorStop(1,'#356c35');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(px,py,16,0,7);ctx.fill()}ctx.restore()}
-function drawCoop(){ctx.save();ctx.shadowColor='rgba(0,0,0,.42)';ctx.shadowBlur=18;ctx.shadowOffsetY=10;ctx.fillStyle=PAT.wood;roundRect(ctx,75,28,330,205,10);ctx.fill();ctx.shadowColor='transparent';ctx.strokeStyle='#4b2918';ctx.lineWidth=6;ctx.stroke();
- ctx.fillStyle='#4a2218';ctx.beginPath();ctx.moveTo(54,78);ctx.lineTo(238,0);ctx.lineTo(430,78);ctx.lineTo(406,96);ctx.lineTo(237,31);ctx.lineTo(76,96);ctx.closePath();ctx.fill();for(let x=72;x<414;x+=23){ctx.fillStyle=x%46?'#a54c31':'#7e3427';ctx.beginPath();ctx.ellipse(x,73,18,9,-.28,0,7);ctx.fill();ctx.strokeStyle='rgba(255,185,120,.2)';ctx.stroke()}
- ctx.fillStyle='#24160f';roundRect(ctx,173,77,135,145,8);ctx.fill();ctx.fillStyle='rgba(255,217,135,.16)';roundRect(ctx,185,91,111,118,5);ctx.fill();ctx.strokeStyle='#b1783e';ctx.lineWidth=5;ctx.stroke();
- ctx.fillStyle='#d7a84c';ctx.fillRect(92,179,291,42);ctx.fillStyle=PAT.straw;ctx.fillRect(92,179,291,42);ctx.strokeStyle='#5c371e';ctx.lineWidth=4;ctx.strokeRect(92,179,291,42);
- for(const n of nests){ctx.save();ctx.translate(n.x,n.y);ctx.fillStyle='#6c3d22';roundRect(ctx,-31,-18,62,48,9);ctx.fill();ctx.fillStyle=PAT.straw;ctx.beginPath();ctx.ellipse(0,15,27,13,0,0,7);ctx.fill();ctx.strokeStyle='#e5b94d';ctx.lineWidth=2;for(let i=0;i<9;i++){ctx.beginPath();ctx.moveTo(-25+i*6,22);ctx.lineTo(-18+i*5,-1+(i%3)*3);ctx.stroke()}ctx.restore()}
- ctx.fillStyle='#eed48c';ctx.font='700 13px system-ui';ctx.fillText('POULAILLER',194,59);ctx.restore()}
-function drawFeeder(){ctx.save();ctx.translate(feeder.x,feeder.y);ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=7;ctx.shadowOffsetY=4;const gr=ctx.createLinearGradient(-35,0,35,0);gr.addColorStop(0,'#5f5a50');gr.addColorStop(.45,'#c7b89d');gr.addColorStop(1,'#514c45');ctx.fillStyle=gr;roundRect(ctx,-46,-10,92,24,8);ctx.fill();ctx.strokeStyle='#35322f';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='#d6a43a';for(let i=-35;i<=35;i+=7){ctx.beginPath();ctx.arc(i,1,2.3,0,7);ctx.fill()}ctx.restore()}
-function drawWater(){ctx.save();ctx.translate(waterer.x,waterer.y);ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=6;ctx.shadowOffsetY=4;ctx.fillStyle='#8c3d2f';ctx.beginPath();ctx.ellipse(0,14,32,12,0,0,7);ctx.fill();const gr=ctx.createLinearGradient(-18,-30,18,20);gr.addColorStop(0,'#f4f3e8');gr.addColorStop(.5,'#b8d8dc');gr.addColorStop(1,'#728f96');ctx.fillStyle=gr;roundRect(ctx,-17,-30,34,42,12);ctx.fill();ctx.fillStyle='rgba(100,190,220,.55)';ctx.beginPath();ctx.ellipse(0,13,25,6,0,0,7);ctx.fill();ctx.restore()}
-function drawMarket(){ctx.save();ctx.translate(market.x,market.y);ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=9;ctx.shadowOffsetY=5;ctx.fillStyle='#744624';roundRect(ctx,-42,-34,84,65,9);ctx.fill();ctx.fillStyle='#d9b565';ctx.fillRect(-38,-31,76,15);ctx.fillStyle='#fff0b6';ctx.font='800 11px system-ui';ctx.fillText('VENTE',-18,-19);ctx.fillStyle='#a77a3d';ctx.beginPath();ctx.ellipse(0,13,31,16,0,0,7);ctx.fill();for(let i=0;i<Math.min(score.eggs,8);i++){ctx.fillStyle='#f5ead0';ctx.beginPath();ctx.ellipse(-20+(i%4)*13,7+(i>3?11:0),5,7,0,0,7);ctx.fill()}ctx.restore()}
-function drawEgg(e){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(Math.sin(time*2+e.wobble)*.03);ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=5;ctx.shadowOffsetY=3;const gr=ctx.createRadialGradient(-3,-5,1,0,0,10);gr.addColorStop(0,'#fffdf2');gr.addColorStop(.65,e.fertilized?'#ead39a':'#f1e7ce');gr.addColorStop(1,'#bca981');ctx.fillStyle=gr;ctx.beginPath();ctx.ellipse(0,0,7,10,0,0,7);ctx.fill();if(e.fertilized){ctx.strokeStyle='#c59128';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,10,0,7);ctx.stroke()}ctx.restore()}
-function drawChicken(a,opt={}){const roosterMode=!!opt.rooster,sc=(opt.scale||1)*(roosterMode?1.22:1);ctx.save();ctx.translate(a.x,a.y);ctx.scale(sc,sc);ctx.rotate(a.dir+Math.PI/2);const bob=Math.sin((a.phase||0))*1.5;ctx.translate(0,bob);ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=6;ctx.shadowOffsetY=5;ctx.fillStyle='rgba(25,20,12,.25)';ctx.beginPath();ctx.ellipse(0,14,22,9,0,0,7);ctx.fill();ctx.shadowColor='transparent';
- const body=ctx.createRadialGradient(-7,-10,3,0,0,30);body.addColorStop(0,roosterMode?'#e79c32':'#fff1d5');body.addColorStop(.45,roosterMode?'#b94b22':a.color||'#d3a477');body.addColorStop(1,roosterMode?'#332b29':'#74442d');ctx.fillStyle=body;ctx.beginPath();ctx.ellipse(0,0,21,28,0,0,7);ctx.fill();
- for(let i=-2;i<=2;i++){ctx.save();ctx.rotate(i*.25);ctx.strokeStyle=roosterMode?(i%2?'#173e38':'#1f2732'):'#6d3d29';ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(i*3,16);ctx.quadraticCurveTo(i*9,29,i*9,38+(roosterMode?12:0));ctx.stroke();ctx.restore()}
- ctx.strokeStyle=roosterMode?'rgba(248,179,60,.55)':'rgba(255,246,220,.42)';ctx.lineWidth=1.4;for(let i=-14;i<=14;i+=5){ctx.beginPath();ctx.arc(i*.55,-1+Math.abs(i)*.25,13,1.1,2.5);ctx.stroke()}
- ctx.fillStyle=roosterMode?'#a73f22':'#b47a4d';ctx.beginPath();ctx.ellipse(-14,-1,9,19,-.3,0,7);ctx.fill();ctx.strokeStyle='rgba(255,225,172,.45)';ctx.lineWidth=1;for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(-16,-8+i*5,8,-1,1);ctx.stroke()}
- ctx.fillStyle=roosterMode?'#ce5c28':a.color||'#d3a477';ctx.beginPath();ctx.arc(0,-29,11,0,7);ctx.fill();ctx.fillStyle='#e0a43c';ctx.beginPath();ctx.moveTo(-4,-31);ctx.lineTo(0,-45);ctx.lineTo(5,-31);ctx.closePath();ctx.fill();ctx.fillStyle='#d12f2f';for(let i=-1;i<=1;i++){ctx.beginPath();ctx.arc(i*5,-42-Math.abs(i)*2,4.5,0,7);ctx.fill()}ctx.beginPath();ctx.ellipse(0,-19,4,7,0,0,7);ctx.fill();
- ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-4,-32,3.8,0,7);ctx.fill();ctx.fillStyle='#17120e';ctx.beginPath();ctx.arc(-4,-32,2.1,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-4.8,-32.8,.7,0,7);ctx.fill();ctx.fillStyle='#e4a33d';ctx.beginPath();ctx.moveTo(1,-29);ctx.lineTo(14,-25);ctx.lineTo(2,-22);ctx.closePath();ctx.fill();
- ctx.strokeStyle='#c98b35';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-7,20);ctx.lineTo(-9,31);ctx.moveTo(7,20);ctx.lineTo(9,31);ctx.stroke();ctx.restore()}
-function drawChick(c){ctx.save();ctx.translate(c.x,c.y+Math.sin(c.phase)*1.5);ctx.rotate(c.dir+Math.PI/2);ctx.shadowColor='rgba(0,0,0,.25)';ctx.shadowBlur=4;ctx.shadowOffsetY=3;const gr=ctx.createRadialGradient(-3,-5,1,0,0,14);gr.addColorStop(0,'#fff39d');gr.addColorStop(1,'#d2a93a');ctx.fillStyle=gr;ctx.beginPath();ctx.ellipse(0,0,9,12,0,0,7);ctx.fill();ctx.beginPath();ctx.arc(0,-11,6,0,7);ctx.fill();ctx.fillStyle='#16120d';ctx.beginPath();ctx.arc(-2,-13,1.5,0,7);ctx.fill();ctx.fillStyle='#dc8d27';ctx.beginPath();ctx.moveTo(2,-11);ctx.lineTo(8,-9);ctx.lineTo(2,-7);ctx.closePath();ctx.fill();ctx.restore()}
-function drawFarmer(f,npc=false){ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.dir+Math.PI/2);const step=Math.sin((f.walk||time*4))*3;ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=6;ctx.shadowOffsetY=5;ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(0,13,16,7,0,0,7);ctx.fill();ctx.shadowColor='transparent';ctx.strokeStyle='#3d2b22';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-6,8);ctx.lineTo(-7+step,23);ctx.moveTo(6,8);ctx.lineTo(7-step,23);ctx.stroke();ctx.fillStyle=npc?'#7b3540':'#2f5d75';roundRect(ctx,-11,-14,22,29,7);ctx.fill();ctx.fillStyle='#f0b17a';ctx.beginPath();ctx.arc(0,-22,8,0,7);ctx.fill();ctx.fillStyle='#6b4829';ctx.beginPath();ctx.ellipse(0,-30,17,5,0,0,7);ctx.fill();ctx.fillStyle='#c99945';ctx.fillRect(-8,-34,16,6);ctx.strokeStyle='#f0b17a';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-9,-8);ctx.lineTo(-15,4+step*.3);ctx.moveTo(9,-8);ctx.lineTo(15,4-step*.3);ctx.stroke();if(!npc&&score.eggs>0){ctx.fillStyle='#9c6a38';ctx.beginPath();ctx.ellipse(16,3,9,6,.3,0,7);ctx.fill();for(let i=0;i<Math.min(score.eggs,4);i++){ctx.fillStyle='#eee1c5';ctx.beginPath();ctx.ellipse(12+i*3,0-(i%2)*3,2.5,3.5,0,0,7);ctx.fill()}}ctx.restore()}
-function drawWorker(){worker.phase+=.02;worker.x=735+Math.cos(time*.35)*55;worker.y=455+Math.sin(time*.35)*30;worker.dir=Math.atan2(Math.cos(time*.35)*10,-Math.sin(time*.35)*18);drawFarmer(worker,true)}
-function render(){ctx.save();ctx.setTransform((devicePixelRatio||1)*viewScale,0,0,(devicePixelRatio||1)*viewScale,(devicePixelRatio||1)*viewX,(devicePixelRatio||1)*viewY);drawGround();drawTree(80,170,.9);drawTree(885,190,.82);drawTree(910,520,.72);drawBush(120,560,1.1);drawBush(835,575,1.25);drawBush(665,190,.9);drawCoop();drawFence();drawFeeder();drawWater();drawMarket();
- const items=[];for(const e of eggs)items.push({y:e.y,draw:()=>drawEgg(e)});for(const h of hens)items.push({y:h.y,draw:()=>drawChicken(h,{scale:h.scale})});items.push({y:rooster.y,draw:()=>drawChicken(rooster,{rooster:true})});for(const c of chicks)items.push({y:c.y,draw:()=>drawChick(c)});items.push({y:worker.y,draw:drawWorker});items.push({y:farmer.y,draw:()=>drawFarmer(farmer)});items.sort((a,b)=>a.y-b.y);for(const it of items)it.draw();ctx.restore()}
-let crowTimer=rand(12,20);function update(dt){time+=dt;if(toastTimer>0&&(toastTimer-=dt)<=0)UI.toast.classList.remove('show');if(!started)return;updateFarmer(dt);for(const h of hens)updateHen(h,dt);updateRooster(dt);updateChicks(dt);crowTimer-=dt;if(crowTimer<=0){playAudio(crow,.2);crowTimer=rand(18,30)}score.feed=clamp(score.feed-dt*.025,0,100);updateUI()}
-function loop(now){const dt=Math.min(.04,(now-last)/1000);last=now;update(dt);render();requestAnimationFrame(loop)}
-updateUI();requestAnimationFrame(loop);
+(async()=>{
+  const status=document.getElementById('status');
+  const error=document.getElementById('error');
+  const commit='e814bf467fb5f4ed99f5c03552bec401b68c7d2a';
+  const base=`https://raw.githubusercontent.com/mrgamerdu84-ctrl/-levage-de-poulet-Tycoon/${commit}/.restore/`;
+  try{
+    const names=['00','01','02','03','04','05','06','07'];
+    const parts=[];
+    for(const name of names){
+      status.textContent=`Récupération de la version originale… ${Number(name)+1}/8`;
+      const response=await fetch(`${base}part${name}.b64`,{cache:'force-cache'});
+      if(!response.ok) throw new Error(`Copie originale introuvable (${response.status})`);
+      parts.push((await response.text()).trim());
+    }
+    const binary=atob(parts.join(''));
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+    if(bytes.length!==45900) throw new Error(`Taille incorrecte : ${bytes.length} octets au lieu de 45900`);
+    if(globalThis.crypto?.subtle){
+      status.textContent='Vérification de la copie originale…';
+      const digest=await crypto.subtle.digest('SHA-256',bytes);
+      const hash=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
+      const expected='683b1c8c654d1a63ca788b4e231e8022c4750af8939fd1f9ca71092d67998be7';
+      if(hash!==expected) throw new Error('La vérification de la copie originale a échoué.');
+    }
+    const html=new TextDecoder('utf-8').decode(bytes);
+    if(!html.includes('<title>Ferme avicole — décor 3D</title>')) throw new Error('Le fichier récupéré ne correspond pas à ta ferme originale.');
+    document.open();
+    document.write(html);
+    document.close();
+  }catch(err){
+    status.textContent='La ferme originale est protégée, mais son chargement a échoué.';
+    error.style.display='block';
+    error.textContent=String(err?.message||err);
+  }
 })();
 </script>
 </body>
