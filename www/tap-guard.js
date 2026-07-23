@@ -1,28 +1,24 @@
 'use strict';
 
-// Empêche les boutons et menus de déclencher le bruit d’un animal situé derrière eux.
+// L’ancien gestionnaire tactile global perdait parfois la cible dans Android WebView.
+// On ignore uniquement ses deux écouteurs, puis on restaure addEventListener.
 (() => {
   const originalAddEventListener = window.addEventListener;
-  let captureListenersToWrap = 2;
+  let listenersToSkip = 2;
 
-  window.addEventListener = function guardedAddEventListener(type, listener, options) {
-    const isAnimalTapCapture =
-      captureListenersToWrap > 0 &&
-      options === true &&
+  window.addEventListener = function skipOldAnimalTouch(type, listener, options) {
+    const capture = options === true || Boolean(options && options.capture === true);
+    const isOldAnimalTouch =
+      listenersToSkip > 0 &&
+      capture &&
       (type === 'pointerdown' || type === 'pointerup');
 
-    if (!isAnimalTapCapture) {
-      return originalAddEventListener.call(this, type, listener, options);
+    if (isOldAnimalTouch) {
+      listenersToSkip -= 1;
+      if (listenersToSkip === 0) window.addEventListener = originalAddEventListener;
+      return undefined;
     }
 
-    const wrapped = function guardedAnimalTap(event) {
-      if (typeof renderer !== 'undefined' && event.target !== renderer.domElement) return;
-      return listener.call(this, event);
-    };
-
-    captureListenersToWrap -= 1;
-    const result = originalAddEventListener.call(this, type, wrapped, options);
-    if (captureListenersToWrap === 0) window.addEventListener = originalAddEventListener;
-    return result;
+    return originalAddEventListener.call(this, type, listener, options);
   };
 })();
