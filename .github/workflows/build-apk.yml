@@ -39,11 +39,28 @@ jobs:
         with:
           gradle-version: '8.4'
 
+      - name: Reconstituer les images officielles
+        run: |
+          mkdir -p www/assets/branding
+          cat www/assets/branding/icon/part*.b64 | tr -d '\n\r ' | base64 -d > www/assets/branding/app-icon.jpg
+          cat www/assets/branding/splash/part*.b64 | tr -d '\n\r ' | base64 -d > www/assets/branding/launch-screen.jpg
+          echo "a96b485983d1156f05a0071b044f23492384de86873b68671e91f1b4dcb6daa2  www/assets/branding/app-icon.jpg" | sha256sum -c -
+          echo "84a12db053f6741467c20e99f8c6d835355e5cf19b006930c9e519faf733915c  www/assets/branding/launch-screen.jpg" | sha256sum -c -
+          file www/assets/branding/app-icon.jpg www/assets/branding/launch-screen.jpg
+
       - name: Installer les dépendances Capacitor
         run: npm install --no-audit --no-fund
 
       - name: Synchroniser le projet Android
         run: npx cap sync android
+
+      - name: Installer l'icône et l'écran de lancement Android
+        run: |
+          mkdir -p android/app/src/main/res/drawable-nodpi
+          cp www/assets/branding/app-icon.jpg android/app/src/main/res/drawable-nodpi/app_icon.jpg
+          cp www/assets/branding/launch-screen.jpg android/app/src/main/res/drawable-nodpi/launch_screen.jpg
+          test -s android/app/src/main/res/drawable-nodpi/app_icon.jpg
+          test -s android/app/src/main/res/drawable-nodpi/launch_screen.jpg
 
       - name: Compiler l'APK debug
         working-directory: android
@@ -52,9 +69,9 @@ jobs:
       - name: Préparer l'APK à télécharger
         run: |
           mkdir -p release
-          cp android/app/build/outputs/apk/debug/app-debug.apk release/elevage-de-poulet-tycoon.apk
-          test -s release/elevage-de-poulet-tycoon.apk
-          ls -lh release/elevage-de-poulet-tycoon.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk release/la-super-ferme-tycoon.apk
+          test -s release/la-super-ferme-tycoon.apk
+          ls -lh release/la-super-ferme-tycoon.apk
 
       - name: Publier une Release APK visible
         env:
@@ -62,9 +79,9 @@ jobs:
         run: |
           TAG="apk-latest"
           gh release delete "$TAG" --cleanup-tag --yes 2>/dev/null || true
-          gh release create "$TAG" release/elevage-de-poulet-tycoon.apk \
+          gh release create "$TAG" release/la-super-ferme-tycoon.apk \
             --target "$GITHUB_SHA" \
-            --title "Élevage de Poulet Tycoon - APK Android" \
+            --title "La Super Ferme d'Élevage d'Animaux Tycoon - APK Android" \
             --notes "Dernière version Android compilée automatiquement depuis la branche main. Build GitHub Actions n°${GITHUB_RUN_NUMBER}." \
             --latest
 
@@ -75,14 +92,15 @@ jobs:
           TAG="apk-latest"
           RELEASE_URL=$(gh release view "$TAG" --json url --jq '.url')
           ASSET_NAME=$(gh release view "$TAG" --json assets --jq '.assets[0].name')
-          test "$ASSET_NAME" = "elevage-de-poulet-tycoon.apk"
+          test "$ASSET_NAME" = "la-super-ferme-tycoon.apk"
           echo "RELEASE_URL=$RELEASE_URL" >> "$GITHUB_ENV"
           echo "Release vérifiée : $RELEASE_URL"
           echo "APK vérifié : $ASSET_NAME"
 
       - name: Résumé de la compilation
         run: |
-          echo "## Élevage de Poulet Tycoon" >> "$GITHUB_STEP_SUMMARY"
+          echo "## La Super Ferme d'Élevage d'Animaux Tycoon" >> "$GITHUB_STEP_SUMMARY"
           echo "✅ L'APK a été compilé et vérifié." >> "$GITHUB_STEP_SUMMARY"
+          echo "🖼️ L'icône carrée et l'écran de lancement vertical officiels sont intégrés." >> "$GITHUB_STEP_SUMMARY"
           echo "📦 [Télécharger la Release APK]($RELEASE_URL)" >> "$GITHUB_STEP_SUMMARY"
-          echo "Fichier : \`elevage-de-poulet-tycoon.apk\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Fichier : \`la-super-ferme-tycoon.apk\`" >> "$GITHUB_STEP_SUMMARY"
