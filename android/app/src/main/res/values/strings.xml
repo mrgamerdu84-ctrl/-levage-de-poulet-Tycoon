@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Élevage de Poulet Tycoon</string>
-    <string name="title_activity_main">Élevage de Poulet Tycoon</string>
+    <string name="app_name">La Super Ferme d’Élevage d’Animaux Tycoon</string>
+    <string name="title_activity_main">La Super Ferme d’Élevage d’Animaux Tycoon</string>
     <string name="package_name">com.fermeavicole.app</string>
     <string name="custom_url_scheme">com.fermeavicole.app</string>
 </resources>
