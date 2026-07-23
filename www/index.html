@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Élevage de Poulet Tycoon</title>
+<title>La Super Ferme d’Élevage d’Animaux Tycoon</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -29,7 +29,7 @@
     z-index:10; transition:opacity .5s ease;
   }
   @media (max-width:680px){
-    #title{font-size:18px; top:10px; left:10px; padding:11px 13px;}
+    #title{font-size:18px; top:10px; left:10px; padding:11px 13px; max-width:52vw;}
     #stats{top:78px; right:10px; min-width:145px; padding:10px 12px;}
     #hint{bottom:10px; width:88vw; padding:9px 11px;}
     #event{bottom:58px; left:10px; max-width:56vw; padding:10px 12px;}
@@ -37,13 +37,14 @@
 </style>
 </head>
 <body>
-<div id="loading">🐔 Préparation de l’exploitation…</div>
+<script src="branding-loader.js"></script>
+<div id="loading">🐔 Préparation de la super ferme…</div>
 <div id="ui">
-  <div class="panel" id="title">Élevage de Poulet Tycoon<span>Exploitation · nourrissage · ponte · couvaison</span></div>
+  <div class="panel" id="title">La Super Ferme Tycoon<span>Élevage d’animaux · gestion · reproduction · ferme</span></div>
   <div class="panel" id="stats">Poules : <b id="hensCount">6</b><br>Œufs pondus : <b id="eggCount">0</b><br>Œufs fécondés : <b id="fertileCount">0</b><br>Poussins nés : <b id="chickCount">0</b></div>
   <div class="panel" id="hint">Glissez pour tourner · pincez pour zoomer · touchez un animal pour l’entendre</div>
-  <div class="panel" id="event">Le fermier prépare le grain pendant que le coq surveille les poules.</div>
-  <div id="credits" style="position:absolute;bottom:2px;left:8px;font-size:9px;color:rgba(74,55,40,.55)">Sons : caquètement © Breviceps · coq © Wikimedia Commons</div>
+  <div class="panel" id="event">Le fermier prépare le grain pendant que le coq surveille les animaux.</div>
+  <div id="credits" style="position:absolute;bottom:2px;left:8px;font-size:9px;color:rgba(74,55,40,.55)">Sons des animaux générés directement dans le jeu</div>
   <button id="resetView" class="panel" style="bottom:60px;right:18px;left:auto;top:auto;pointer-events:auto;border:none;font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;cursor:pointer">🔭 Vue d’ensemble</button>
   <div class="panel" id="soundHint" style="bottom:60px;left:50%;transform:translateX(-50%);font-size:12px">🔊 Touchez l’écran pour activer le son</div>
 </div>
