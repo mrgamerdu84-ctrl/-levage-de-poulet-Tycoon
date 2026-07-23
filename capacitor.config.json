@@ -1,6 +1,6 @@
 {
   "appId": "com.fermeavicole.app",
-  "appName": "Élevage de Poulet Tycoon",
+  "appName": "La Super Ferme d’Élevage d’Animaux Tycoon",
   "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
