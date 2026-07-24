@@ -1,1 +1,0 @@
-Refonte V4 : contrôleur final des collisions, portes, intérieurs, route camion, fermiers et effets saisonniers. Le système audio des animaux reste séparé et inchangé.
