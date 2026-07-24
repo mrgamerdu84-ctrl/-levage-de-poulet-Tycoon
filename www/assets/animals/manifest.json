@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "animals": {
+    "hen": {
+      "enabled": true,
+      "model": "assets/animals/hen/hen.glb",
+      "sprite": "assets/animals/hen/hen.png",
+      "animations": ["idle", "stand", "breathe", "walk", "eat"],
+      "transform": {
+        "scale": 0.72,
+        "position": [0, 0.02, 0],
+        "rotation": [0, 3.141592653589793, 0]
+      },
+      "spriteSize": [1.55, 1.55]
+    },
+    "rooster": {
+      "enabled": true,
+      "model": "assets/animals/rooster/rooster.glb",
+      "sprite": "assets/animals/rooster/rooster.png",
+      "animations": ["idle", "stand", "breathe", "walk"],
+      "transform": {
+        "scale": 0.82,
+        "position": [0, 0.02, 0],
+        "rotation": [0, 3.141592653589793, 0]
+      },
+      "spriteSize": [1.8, 1.8]
+    },
+    "cow": {
+      "enabled": true,
+      "model": "assets/animals/cow/cow.glb",
+      "sprite": "assets/animals/cow/cow.png",
+      "animations": ["idle", "stand", "breathe", "walk", "eat"],
+      "transform": {
+        "scale": 1.05,
+        "position": [0, 0.02, 0],
+        "rotation": [0, 3.141592653589793, 0]
+      },
+      "spriteSize": [2.75, 2.35]
+    },
+    "pig": {
+      "enabled": true,
+      "model": "assets/animals/pig/pig.glb",
+      "sprite": "assets/animals/pig/pig.png",
+      "animations": ["idle", "stand", "breathe", "walk", "eat"],
+      "transform": {
+        "scale": 0.94,
+        "position": [0, 0.02, 0],
+        "rotation": [0, 3.141592653589793, 0]
+      },
+      "spriteSize": [2.15, 1.8]
+    },
+    "sheep": {
+      "enabled": true,
+      "model": "assets/animals/sheep/sheep.glb",
+      "sprite": "assets/animals/sheep/sheep.png",
+      "animations": ["idle", "stand", "breathe", "walk", "eat"],
+      "transform": {
+        "scale": 0.98,
+        "position": [0, 0.02, 0],
+        "rotation": [0, 3.141592653589793, 0]
+      },
+      "spriteSize": [2.2, 1.9]
+    },
+    "duck": {
+      "enabled": true,
+      "model": "assets/animals/duck/duck.glb",
+      "sprite": "assets/animals/duck/duck.png",
+      "animations": ["idle", "stand", "breathe", "walk", "swim"],
+      "transform": {
+        "scale": 0.66,
+        "position": [0, 0.02, 0],
+        "rotation": [0, 3.141592653589793, 0]
+      },
+      "spriteSize": [1.55, 1.4]
+    }
+  }
+}
